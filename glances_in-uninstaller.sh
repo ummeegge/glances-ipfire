@@ -49,8 +49,8 @@ clean_up() {
     cd /tmp || exit 1;
 }
 
+# Search for symlink position function and set them
 symlink_function() {
-    ## Add symlinks
     # Possible runlevel ranges
     SO="[5-9][0-9]";
     SA="[3-9][0-9]";
@@ -65,7 +65,7 @@ symlink_function() {
     ln -s ../init.d/${BIN} /etc/rc.d/rc6.d/K${REBOOT}${BIN};
 }
 
-# Installer Menu
+## Installer Menu
 while true
 do
     # Choose installation
@@ -86,11 +86,11 @@ do
     read choice
     clear;
 
-    # Install Glances
+    # Installer
     case $choice in
         i*|I*)
             clear;
-            if [ -e /usr/bin/glances ]; then
+            if ls /usr/bin/ | grep -q glances; then
                 echo;
                 echo "Glances is already installed on your system, please uninstall it first if needed. ";
                 echo
@@ -108,41 +108,42 @@ do
                         CHECK=$(sha256sum ${PACKAGEA} | awk '{print $1}');
                         if [[ "${CHECK}" = "${SUMA}" ]]; then
                             echo;
-                            echo -e "SHA2 sum should be \033[1;32m${SUMA}\033[0m";
-                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is correct… ";
+                            echo -e "SHA2 sum should be ${B}${b}${SUMA}${N}";
+                            echo -e "SHA2 sum is        ${B}${b}${CHECK}${N} and is correct… ";
                             echo;
                             echo "will go to further processing :-) ...";
                             echo;
                             sleep 3;
                         else
                             echo;
-                            echo -e "SHA2 sum should be \033[1;32m${SUMA}\033[0m";
-                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is not correct… ";
+                            echo -e "SHA2 sum should be ${R}${b}${SUMA}${N}";
+                            echo -e "SHA2 sum is        ${R}${b}${CHECK}${N} and is not correct… ";
                             echo;
-                            echo -e "\033[1;31mShit happens :-( the SHA2 sum is incorrect, please report this here\033[0m";
+                            echo -e "\033[1;31mShit happens :-( the SHA2 sum is incorrect, please report this ";
+                            echo -e "here --> ${b}https://forum.ipfire.org/viewtopic.php?t=16563${N}";
                             echo;
                             exit 1;
                         fi
                     fi
                 elif [[ ${TYPE} = "64" ]]; then
                     # Check if package is already presant otherwise download it
-                    if [[ ! -e "${PACKAGE}" ]]; then
+                    if [ ! -e "${PACKAGEB}" ]; then
                         echo;
                         curl -O ${URLB}/${PACKAGEB};
                         # Check SHA256 sum
                         CHECK=$(sha256sum ${PACKAGEB} | awk '{print $1}');
                         if [[ "${CHECK}" = "${SUMB}" ]]; then
                             echo;
-                            echo -e "SHA2 sum should be \033[1;32m${SUMB}\033[0m";
-                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is correct… ";
+                            echo -e "SHA2 sum should be ${B}${b}${SUMB}${N}";
+                            echo -e "SHA2 sum is        ${B}${b}${CHECK}${N} and is correct… ";
                             echo;
                             echo "will go to further processing :-) ...";
                             echo;
                             sleep 3;
                         else
                             echo;
-                            echo -e "SHA2 sum should be \033[1;32m${SUMB}\033[0m";
-                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is not correct… ";
+                            echo -e "SHA2 sum should be ${R}${b}${SUMB}${N}";
+                            echo -e "SHA2 sum is        ${R}${b}${CHECK}${N} and is not correct… ";
                             echo;
                             echo -e "\033[1;31mShit happens :-( the SHA2 sum is incorrect, please report this here\033[0m";
                             echo;
@@ -150,10 +151,10 @@ do
                         fi
                     fi
                 else
-                        echo;
-                        echo "Sorry this platform is currently not supported... Need to quit.";
-                        echo;
-                        exit 1;
+                    echo;
+                    echo "Sorry this platform is currently not supported... Need to quit.";
+                    echo;
+                    exit 1;
                 fi
             fi
 
@@ -169,7 +170,7 @@ do
             # Install setuptools
             mv ${SE} ${PAK};
             cd ${PAK};
-            $TAR ${SE};
+            ${TAR} ${SE};
             ./install.sh;
             clean_up;
 
@@ -179,7 +180,7 @@ do
             # Install glances
             mv ${PS} ${PAK};
             cd ${PAK};
-            $TAR ${PS};
+            ${TAR} ${PS};
             ./install.sh;
             clean_up;
 
@@ -259,9 +260,9 @@ EOF
                     touch ${META};
                     /etc/init.d/glances start;
                     echo;
-                    echo "You can reach the Glances web interface over 'http://Green-IP-ipfire:61208' ";
-                    echo "For further extensions, take a look in here --> http://forum.ipfire.org/viewtopic.php?t=16563 ...";
-                    echo
+                    echo "You can reach the Glances web interface over '${R}${b}http://Green-IP-ipfire:61208${N}' ";
+                    echo "For further extensions, take a look in here --> ${B}${b}http://forum.ipfire.org/viewtopic.php?t=16563${N} ...";
+                    echo;
                     read -p "To finish now installation press [ENTER] ... ";
                     echo;
                 ;;
@@ -273,13 +274,11 @@ EOF
                     sleep 3
                 ;;
             esac
-
             clear;
             echo "Installation is finish now... "
             echo
             sleep 3;
             echo;
-            clear;
             printf "%b" "If you want to start it now press ${R}'Y'${N} (you can quit it by pressing ${R}'q'${N} - Otherwise press ${R}'N'${N}: \nYou can use Glances by simply typing 'glances' into the console: \n";
             read what;
             echo;
@@ -296,11 +295,10 @@ EOF
             esac
             exit 0
         ;;
-           
+
         u*|U*)
             clear;
             read -p "To uninstall Glances now press u and [ENTER], to quit use [CTRL-c]... ";
-
             if [ -e /usr/bin/glances ]; then
                 rm -rvf \
                 /usr/bin/glances \
@@ -324,8 +322,9 @@ EOF
                 echo "Goodbye."
                 echo;
                 if [ -n "$(pgrep glances)" ]; then
-                    kill $(pgrep glances);
+                    kill -9 $(pgrep glances);
                 fi
+                exit 0;
             else
                 echo;
                 echo "Can´t find Glances installation... ";
@@ -341,16 +340,14 @@ EOF
         *)
             echo;
             echo "   Ooops, there went something wrong 8-\ - for explanation again   ";
-            echo "-------------------------------------------------------------------";
-            echo "             To install Glances press    'i' and [ENTER]";
-            echo "             To uninstall Glances press  'u' and [ENTER]";
+            seperator;
+            printf "%*s\n" $(((${#WELCOME}+COLUMNS)/2)) "${WELCOME}";
+            printf "%*s\n" $(((${#WELCOMEA}+COLUMNS)/2)) "${WELCOMEA}";
             echo;
             read -p " To start the installer again press [ENTER] , to quit use [CTRL-c]";
             echo;
         ;;
-   
     esac
-
 done
 
 ## EOF
