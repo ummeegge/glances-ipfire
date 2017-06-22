@@ -17,6 +17,7 @@ PAK="/opt/pakfire/tmp";
 TAR="tar xvf";
 INIT="/etc/rc.d/init.d/glances";
 BIN="glances";
+META="/opt/pakfire/db/installed/meta-glances";
 
 # Packages
 GL="glances-2.10-1.ipfire";
@@ -89,110 +90,113 @@ do
     case $choice in
         i*|I*)
             clear;
-            read -p "To install Glances now press [ENTER] , to quit use [CTRL-c]... ";
-            cd /tmp || exit 1;
-            # Check for 32-bit system
-            if [[ ${TYPE} = "86" ]]; then
-                # Check if package is already presant otherwise download it
-                if [[ ! -e "${PACKAGEA}" ]]; then
-                    echo;
-                    curl -O ${URLA}/${PACKAGEA};
-                    # Check SHA256 sum
-                    CHECK=$(sha256sum ${PACKAGEA} | awk '{print $1}');
-                    if [[ "${CHECK}" = "${SUMA}" ]]; then
-                        echo;
-                        echo -e "SHA2 sum should be \033[1;32m${SUMA}\033[0m";
-                        echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is correct… ";
-                        echo;
-                        echo "will go to further processing :-) ...";
-                        echo;
-                        sleep 3;
-                    else
-                        echo;
-                        echo -e "SHA2 sum should be \033[1;32m${SUMA}\033[0m";
-                        echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is not correct… ";
-                        echo;
-                        echo -e "\033[1;31mShit happens :-( the SHA2 sum is incorrect, please report this here\033[0m";
-                        echo;
-                        exit 1;
-                    fi
-                fi
-            elif [[ ${TYPE} = "64" ]]; then
-                # Check if package is already presant otherwise download it
-                if [[ ! -e "${PACKAGE}" ]]; then
-                    echo;
-                    curl -O ${URLB}/${PACKAGEB};
-                    # Check SHA256 sum
-                    CHECK=$(sha256sum ${PACKAGEB} | awk '{print $1}');
-                    if [[ "${CHECK}" = "${SUMB}" ]]; then
-                        echo;
-                        echo -e "SHA2 sum should be \033[1;32m${SUMB}\033[0m";
-                        echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is correct… ";
-                        echo;
-                        echo "will go to further processing :-) ...";
-                        echo;
-                        sleep 3;
-                    else
-                        echo;
-                        echo -e "SHA2 sum should be \033[1;32m${SUMB}\033[0m";
-                        echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is not correct… ";
-                        echo;
-                        echo -e "\033[1;31mShit happens :-( the SHA2 sum is incorrect, please report this here\033[0m";
-                        echo;
-                        exit 1;
-                    fi
-                fi
+            if [ -e /usr/bin/glances ]; then
+                echo;
+                echo "Glances is already installed on your system, please uninstall it first if needed. ";
+                echo
+                exit 1;
             else
-                    echo;
-                    echo "Sorry this platform is currently not supported... Need to quit.";
-                    echo;
-                    exit 1;
+                read -p "To install Glances now press [ENTER] , to quit use [CTRL-c]... ";
+                cd /tmp || exit 1;
+                # Check for 32-bit system
+                if [[ ${TYPE} = "86" ]]; then
+                    # Check if package is already presant otherwise download it
+                    if [[ ! -e "${PACKAGEA}" ]]; then
+                        echo;
+                        curl -O ${URLA}/${PACKAGEA};
+                        # Check SHA256 sum
+                        CHECK=$(sha256sum ${PACKAGEA} | awk '{print $1}');
+                        if [[ "${CHECK}" = "${SUMA}" ]]; then
+                            echo;
+                            echo -e "SHA2 sum should be \033[1;32m${SUMA}\033[0m";
+                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is correct… ";
+                            echo;
+                            echo "will go to further processing :-) ...";
+                            echo;
+                            sleep 3;
+                        else
+                            echo;
+                            echo -e "SHA2 sum should be \033[1;32m${SUMA}\033[0m";
+                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is not correct… ";
+                            echo;
+                            echo -e "\033[1;31mShit happens :-( the SHA2 sum is incorrect, please report this here\033[0m";
+                            echo;
+                            exit 1;
+                        fi
+                    fi
+                elif [[ ${TYPE} = "64" ]]; then
+                    # Check if package is already presant otherwise download it
+                    if [[ ! -e "${PACKAGE}" ]]; then
+                        echo;
+                        curl -O ${URLB}/${PACKAGEB};
+                        # Check SHA256 sum
+                        CHECK=$(sha256sum ${PACKAGEB} | awk '{print $1}');
+                        if [[ "${CHECK}" = "${SUMB}" ]]; then
+                            echo;
+                            echo -e "SHA2 sum should be \033[1;32m${SUMB}\033[0m";
+                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is correct… ";
+                            echo;
+                            echo "will go to further processing :-) ...";
+                            echo;
+                            sleep 3;
+                        else
+                            echo;
+                            echo -e "SHA2 sum should be \033[1;32m${SUMB}\033[0m";
+                            echo -e "SHA2 sum is        \033[1;32m${CHECK}\033[0m and is not correct… ";
+                            echo;
+                            echo -e "\033[1;31mShit happens :-( the SHA2 sum is incorrect, please report this here\033[0m";
+                            echo;
+                            exit 1;
+                        fi
+                    fi
+                else
+                        echo;
+                        echo "Sorry this platform is currently not supported... Need to quit.";
+                        echo;
+                        exit 1;
+                fi
             fi
 
-                ## Installation part
-                pakfire install python-distutils;
-                if [ -e /usr/bin/glances ]; then
-                    echo;
-                    echo "Glances is already installed on your system, please uninstall it first if needed. ";
-                    echo
-                    exit 1;
-                else
-                    tar xvfz glances_for_IPFire-2.10-*;
-                    # Install psutil
-                    mv ${GL} ${PAK};
-                 cd ${PAK};
-                    ${TAR} ${GL}
-                    ./install.sh;
-                    clean_up;
+            ## Installation part
+            tar xvfz glances_for_IPFire-2.10-*;
+            # Install psutil
+            mv ${GL} ${PAK};
+            cd ${PAK};
+            ${TAR} ${GL}
+            ./install.sh;
+            clean_up;
 
-                    # Install setuptools
-                    mv ${SE} ${PAK};
+            # Install setuptools
+            mv ${SE} ${PAK};
+            cd ${PAK};
+            $TAR ${SE};
+            ./install.sh;
+            clean_up;
+
+            # Install distutils via Pakfire
+            pakfire install python-distutils;
+
+            # Install glances
+            mv ${PS} ${PAK};
+            cd ${PAK};
+            $TAR ${PS};
+            ./install.sh;
+            clean_up;
+
+            clear;
+            printf "%b" "If you want also the Glances webinterface press ${R}'Y'${N} - If Glances over Console/SSH is enough press ${R}'N'${N}: ";
+            read what;
+            echo;
+            case "$what" in
+                y*|Y*)
+                    # Install bottle
+                    mv ${BO} ${PAK};
                     cd ${PAK};
-                    $TAR ${SE};
+                    ${TAR} ${BO}
                     ./install.sh;
                     clean_up;
-
-                    # Install glances
-                    mv ${PS} ${PAK};
-                    cd ${PAK};
-                    $TAR ${PS};
-                    ./install.sh;
-                    clean_up;
-
-                    clear;
-                    printf "%b" "If you want also the Glances webinterface press ${R}'Y'${N} - If Glances over Console/SSH is enough press ${R}'N'${N}: ";
-                    read what;
-                    echo;
-                    case "$what" in
-                        y*|Y*)
-                            # Install bottle
-                            mv ${BO} ${PAK};
-                            cd ${PAK};
-                            ${TAR} ${BO}
-                            ./install.sh;
-                            clean_up;
-                            # Install glances init script
-                            cat > "${INIT}" << "EOF"
+                    # Install glances init script
+                    cat > "${INIT}" << "EOF"
 #!/bin/sh
 ########################################################################
 # Begin $rc_base/init.d/glances
@@ -247,56 +251,57 @@ esac
 # End $rc_base/init.d/glances
 
 EOF
-                            # Set init script permissions
-                            chmod 754 ${INIT};
-                            # Set symlinks
-                            symlink_function;
-                            ${INIT} start;
-                            echo;
-                            echo "You can reach the Glances web interface over 'http://Green-IP-ipfire:61208' ";
-                            echo "For further extensions, take a look in here --> http://forum.ipfire.org/viewtopic.php?t=16563 ...";
-                            echo
-                            read -p "To proceed further press [ENTER] ... ";
-                            echo;
-                        ;;
+                    # Set init script permissions
+                    chmod 754 ${INIT};
+                    # Set symlinks
+                    symlink_function;
+                    # Set meta file
+                    touch ${META};
+                    /etc/init.d/glances start;
+                    echo;
+                    echo "You can reach the Glances web interface over 'http://Green-IP-ipfire:61208' ";
+                    echo "For further extensions, take a look in here --> http://forum.ipfire.org/viewtopic.php?t=16563 ...";
+                    echo
+                    read -p "To finish now installation press [ENTER] ... ";
+                    echo;
+                ;;
 
-                        n*|N*)
-                            echo;
-                            echo "OK won´t install Glances web interface";
-                            echo;
-                            sleep 3
-                        ;;
-                    esac
-                fi
+                n*|N*)
+                    echo;
+                    echo "OK won´t install Glances web interface";
+                    echo;
+                    sleep 3
+                ;;
+            esac
 
-                clear;
-                echo "Installation is finish now... "
-                echo
-                sleep 3;
-                echo;
-                clear;
-                printf "%b" "If you want to start it now press ${R}'Y'${N} (you can quit it by pressing ${R}'q'${N} - Otherwise press ${R}'N'${N}: \nYou can use Glances by simply typing 'glances' into the console: \n";
-                read what;
-                echo;
-                case "$what" in
-                    y*|Y*)
-                        # Start Glances
-                        glances;
-                    ;;
-                    n*|N*)
-                        echo "OK will quit... Goodbye. ";
-                        exit 0;
-                    ;;
-                esac
-                exit 0
+            clear;
+            echo "Installation is finish now... "
+            echo
+            sleep 3;
+            echo;
+            clear;
+            printf "%b" "If you want to start it now press ${R}'Y'${N} (you can quit it by pressing ${R}'q'${N} - Otherwise press ${R}'N'${N}: \nYou can use Glances by simply typing 'glances' into the console: \n";
+            read what;
+            echo;
+            case "$what" in
+                y*|Y*)
+                    # Start Glances
+                    glances;
+                ;;
+
+                n*|N*)
+                    echo "OK will quit... Goodbye. ";
+                    exit 0;
+                ;;
+            esac
+            exit 0
         ;;
            
         u*|U*)
             clear;
             read -p "To uninstall Glances now press u and [ENTER], to quit use [CTRL-c]... ";
 
-            if [[ -e /usr/bin/glances ]]; then
-                ${INIT} stop;
+            if [ -e /usr/bin/glances ]; then
                 rm -rvf \
                 /usr/bin/glances \
                 /etc/glances \
@@ -305,16 +310,22 @@ EOF
                 /usr/lib/python2.7/site-packages/easy-install.pth \
                 /usr/lib/python2.7/site-packages/bottle.py* \
                 /usr/lib/python2.7/site-packages/Glances-*-py2.7.egg/ \
-                /usr/lib/python2.7/site-packages/psutil-*-py2.7-*.egg \
-                ${INIT} \
-                /etc/rc.d/rc.?/*glances;
+                /usr/lib/python2.7/site-packages/psutil-*-py2.7-*.egg;
                 pakfire remove python-distutils;
+                if [ -e "${INIT}" ]; then
+                    rm -rfv \
+                    ${INIT} \
+                    ${META} \
+                    /etc/rc.d/rc?.d/*glances;
+                fi
                 echo;
                 echo "Glances has been uninstalled, the uninstaller is finished now, thanks for testing.";
                 echo;
                 echo "Goodbye."
                 echo;
-                exit 0;
+                if [ -n "$(pgrep glances)" ]; then
+                    kill $(pgrep glances);
+                fi
             else
                 echo;
                 echo "Can´t find Glances installation... ";
