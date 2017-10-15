@@ -8,10 +8,10 @@
 #
 
 PACKAGEA="glances_for_IPFire-2.10-32bit.tar.gz";
-URLA="http://people.ipfire.org/~ummeegge/glances/32bit/";
+URLA="https://people.ipfire.org/~ummeegge/glances/32bit/";
 SUMA="5799fd7e65c18dc61fe6f8d13a997cef20714686137ba62d3a6ccb06425c387d";
 PACKAGEB="glances_for_IPFire-2.10-64bit.tar.gz";
-URLB="http://people.ipfire.org/~ummeegge/glances/64bit/";
+URLB="https://people.ipfire.org/~ummeegge/glances/64bit/";
 SUMB="5a15bce2e2152dae72a5e61ac9dbb568c37b2f80eaab4f000b848924de4b8458";
 PAK="/opt/pakfire/tmp";
 TAR="tar xvf";
